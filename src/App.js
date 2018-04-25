@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
@@ -61,17 +61,35 @@ class App extends Component {
     var calendarYears = [];
     if (this.state.birthday !== null) {
       var bday = moment.unix(this.state.birthday);
-      for (var i=0;i<125;i++) {
+      for (var i = 0; i < maxAge; i++) {
+        //set the current year
         var year = bday.add(1, 'years');
 
+        //calculate year fill day by day
         var lived = 0;
-        if (moment().year() > year.year()) {
-          lived = 100;
-        } else if (moment().year() === year.year()) {
-          var daysInYear = (year.isLeapYear ? 366 : 365);
-          lived = (year.dayOfYear() / daysInYear) * 100;
-        } //else it hasnt been lived yet
+        var daysInYear = (year.isLeapYear ? 366 : 365);
+        var daysInYearArray = new Array(daysInYear);
 
+        for (var d = 0; d<daysInYearArray.length; d++) {
+          var dayInfo = { dayClassName: "calendar-day"};
+          if (moment().year() > year.year()) {
+            dayInfo.dayClassName += " lived";
+          } else if (moment().year() === year.year()) {
+            if (d < year.dayOfYear()) {
+              dayInfo.dayClassName += " lived"
+            }
+          }
+          daysInYearArray[d] = dayInfo;
+        }
+
+        // FIXME for year based comparison
+        // if (moment().year() > year.year()) {
+        //   lived = 100;
+        // } else if (moment().year() === year.year()) {
+        //   lived = (year.dayOfYear() / daysInYear) * 100;
+        // } //else it hasnt been lived yet
+
+        //determine if in later years
         var calClassName = "calendar-year";
         if (i === averageLifespan) {
           calClassName += " death";
@@ -79,14 +97,16 @@ class App extends Component {
           calClassName += " past-life";
         } 
 
+        //create object and return
         var yearInfo = {
           year: year.year(),
           percentLived: lived,
           isLeapYear: year.isLeapYear(),
+          daysInYear: daysInYear,
+          daysInYearArray: daysInYearArray,
           fillStyle: { height: lived + '%'},
           calendarClassName: calClassName
         };
-
         calendarYears.push(yearInfo);
       }
     }
@@ -117,25 +137,27 @@ class App extends Component {
               <p>{yearsPercentage}</p>
             </div>
             <div className="ui simple item">
-              <a href="https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy" target="_blank">Average lifespan: {averageLifespan} years old</a>
+              <a href="https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy" rel="noopener noreferrer" target="_blank">Average lifespan: {averageLifespan} years old</a>
             </div>
             <div className="ui simple item">
-              <a href="https://en.wikipedia.org/wiki/List_of_the_verified_oldest_people" target="_blank">Record to beat: 122 years old</a>
+              <a href="https://en.wikipedia.org/wiki/List_of_the_verified_oldest_people" rel="noopener noreferrer" target="_blank">Record to beat: 122 years old</a>
             </div>
             <div className="ui simple item">
-              <p>Last updated 25 April 2018</p>
+              <p>Based on WHO 2010-2015 data</p>
             </div>
           </div>
         </div>
         <div className="life-calendar">
           <div className="calendar-area">
-            {calendarYears.map(
-              function (yearInfo, index) {
-                return <div className={yearInfo.calendarClassName} title={yearInfo.year} key={index}>
-                    <div className="calendar-fill" style={yearInfo.fillStyle}></div>
-                  </div>;
-              }
-            )}
+            {calendarYears.map((yearInfo, yIndex) => {
+              return <div className={yearInfo.calendarClassName} title={yearInfo.year} key={yIndex}>
+                  <div className="calendar-day-holder">
+                    {yearInfo.daysInYearArray.map((dayInfo, dIndex) => {
+                      return <div key={dIndex} className={dayInfo.dayClassName}></div>
+                    })}
+                  </div>
+                </div>;
+            })}
           </div>
         </div>
       </div>

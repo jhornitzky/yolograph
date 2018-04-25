@@ -30,22 +30,12 @@
 .calendar-year {
   flex-grow:1;
   height:100%;
-  background-color:#DDD;
-  border-right:1px solid plum;
 }
 
-.calendar-year.death {
-  background-color:red;
-}
-
-.calendar-year.past-life {
-  background-color:#AAA;
-  border-right:1px solid #BBB;
-}
-
-.calendar-year:hover {
-  flex-grow:1;
-  background-color:#CCC;
+/*
+.calendar-fill {
+  width:100%;
+  background-color:purple;
 }
 
 .calendar-fill {
@@ -55,4 +45,32 @@
 
 .calendar-year:hover .calendar-fill {
   background-color:plum;
+}
+*/
+
+.calendar-day-holder {
+  display:flex;
+  flex-direction: column;
+  width:100%;
+  height:100%;
+}
+
+.calendar-day {
+  flex-grow:1;
+  width:100%;
+  background-color:#CCC;
+  border-bottom:1px solid plum;
+  border-right:1px solid plum;
+}
+
+.calendar-day.lived {
+  background-color:purple;
+}
+
+.calendar-year.death .calendar-day {
+  background-color:red;
+}
+
+.calendar-year.past-life .calendar-day {
+  background-color:#AAA;
 }
