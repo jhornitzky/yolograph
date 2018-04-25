@@ -2,6 +2,7 @@
   "name": "livemortal",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://jhornitzky.github.io/yolograph/demo/",
   "dependencies": {
     "moment": "^2.22.1",
     "react": "^16.3.2",
