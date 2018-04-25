@@ -60,26 +60,34 @@ class App extends Component {
     //calendar data
     var calendarYears = [];
     if (this.state.birthday !== null) {
-      var bday = moment.unix(this.state.birthday);
       for (var i = 0; i < maxAge; i++) {
+        var bday = moment.unix(this.state.birthday);
+
         //set the current year
-        var year = bday.add(1, 'years');
+        var year = bday.add(i, 'years');
 
         //calculate year fill day by day
         var lived = 0;
-        var daysInYear = (year.isLeapYear ? 366 : 365);
-        var daysInYearArray = new Array(daysInYear);
+        var weeksInYear = 52; //always 52, so easier to deal with
+        var weeksInYearArray = new Array(weeksInYear);
 
-        for (var d = 0; d<daysInYearArray.length; d++) {
-          var dayInfo = { dayClassName: "calendar-day"};
-          if (moment().year() > year.year()) {
-            dayInfo.dayClassName += " lived";
-          } else if (moment().year() === year.year()) {
-            if (d < year.dayOfYear()) {
-              dayInfo.dayClassName += " lived"
+        for (var w = 1; w <= weeksInYear; w++) {
+          var weekInfo = { 
+            weekClassName: "calendar-week" , 
+            title: "Week " + w + " " + year.year(),
+            key: "wy" + w + "" + year.year()
+          };
+
+          if (i === 0) {
+            if ( w >= bday.week()) { 
+              weekInfo.weekClassName += " lived";
             }
+          } else if (moment().year() > year.year()) {
+            weekInfo.weekClassName += " lived";
+          } else if (moment().year() === year.year() && w < year.week()) {
+            weekInfo.weekClassName += " lived";
           }
-          daysInYearArray[d] = dayInfo;
+          weeksInYearArray[w] = weekInfo;
         }
 
         // FIXME for year based comparison
@@ -99,13 +107,11 @@ class App extends Component {
 
         //create object and return
         var yearInfo = {
+          key:"y"+year.year(),
           year: year.year(),
-          percentLived: lived,
-          isLeapYear: year.isLeapYear(),
-          daysInYear: daysInYear,
-          daysInYearArray: daysInYearArray,
-          fillStyle: { height: lived + '%'},
-          calendarClassName: calClassName
+          calendarClassName: calClassName,
+          weeksInYear: weeksInYear,
+          weeksInYearArray: weeksInYearArray
         };
         calendarYears.push(yearInfo);
       }
@@ -115,7 +121,7 @@ class App extends Component {
       <div className="App">
         <div className="ui fixed inverted menu">
           <div className="ui fluid container">
-            <a href="#" className="header item">
+            <a href="mailto:someoneyoulove@somewhere.com.au" className="header item">
               YOLOGraph
             </a>
             <div className="ui item">
@@ -150,10 +156,10 @@ class App extends Component {
         <div className="life-calendar">
           <div className="calendar-area">
             {calendarYears.map((yearInfo, yIndex) => {
-              return <div className={yearInfo.calendarClassName} title={yearInfo.year} key={yIndex}>
-                  <div className="calendar-day-holder">
-                    {yearInfo.daysInYearArray.map((dayInfo, dIndex) => {
-                      return <div key={dIndex} className={dayInfo.dayClassName}></div>
+              return <div className={yearInfo.calendarClassName} key={yIndex}>
+                  <div className="calendar-week-holder">
+                    {yearInfo.weeksInYearArray.map((weekInfo, wIndex) => {
+                    return <div key={weekInfo.key} className={weekInfo.weekClassName} title={weekInfo.title}></div>
                     })}
                   </div>
                 </div>;

@@ -48,14 +48,14 @@
 }
 */
 
-.calendar-day-holder {
+.calendar-week-holder {
   display:flex;
   flex-direction: column;
   width:100%;
   height:100%;
 }
 
-.calendar-day {
+.calendar-week {
   flex-grow:1;
   width:100%;
   background-color:#CCC;
@@ -63,14 +63,18 @@
   border-right:1px solid plum;
 }
 
-.calendar-day.lived {
+.calendar-week:hover {
+  background-color:#FFF !important;
+}
+
+.calendar-week.lived {
   background-color:purple;
 }
 
-.calendar-year.death .calendar-day {
+.calendar-year.death .calendar-week {
   background-color:red;
 }
 
-.calendar-year.past-life .calendar-day {
+.calendar-year.past-life .calendar-week {
   background-color:#AAA;
 }
