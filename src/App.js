@@ -9,6 +9,8 @@ import './App.css';
 import './semantic.css';
 
 const storageKey = "livemortal";
+const averageLifespan = 70;
+const maxAge = 125;
 
 class App extends Component {
 
@@ -52,7 +54,8 @@ class App extends Component {
     var momentBirthday = this.state.birthday !== null ? moment.unix(this.state.birthday) : null;
 
     //age text
-    var ageText = this.state.age > 0 ? this.state.age + ' years / ' + Math.floor((this.state.age/125)*100) + '% lived' : '';
+    var yearsText = this.state.age > 0 ? this.state.age + ' years old' : '';
+    var yearsPercentage = this.state.age > 0 ? Math.floor((this.state.age / averageLifespan) * 100) + '% lived' : '';
 
     //calendar data
     var calendarYears = [];
@@ -69,11 +72,19 @@ class App extends Component {
           lived = (year.dayOfYear() / daysInYear) * 100;
         } //else it hasnt been lived yet
 
+        var calClassName = "calendar-year";
+        if (i === averageLifespan) {
+          calClassName += " death";
+        } else if (i > averageLifespan) {
+          calClassName += " past-life";
+        } 
+
         var yearInfo = {
           year: year.year(),
           percentLived: lived,
           isLeapYear: year.isLeapYear(),
-          fillStyle: { height: lived + '%'}
+          fillStyle: { height: lived + '%'},
+          calendarClassName: calClassName
         };
 
         calendarYears.push(yearInfo);
@@ -82,24 +93,45 @@ class App extends Component {
 
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="Live Mortal" />
-          <DatePicker
-            selected={momentBirthday}
-            onChange={this.dobChanged} 
-            dateFormat="DD MMM YYYY"
-            showMonthDropdown
-            showYearDropdown
-            dropdownMode="select"
-            placeholderText="Your Birthday" 
-          />
-          <p className="age">{ageText}</p>
-        </header>
+        <div className="ui fixed inverted menu">
+          <div className="ui fluid container">
+            <a href="#" className="header item">
+              YOLOGraph
+            </a>
+            <div className="ui item">
+              <DatePicker
+                selected={momentBirthday}
+                onChange={this.dobChanged}
+                dateFormat="DD MMM YYYY"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                placeholderText="Your Birthday"
+                className="your-age"
+              />
+            </div>
+            <div className="ui simple item">
+              <p>{yearsText}</p>
+            </div>
+            <div className="ui simple item">
+              <p>{yearsPercentage}</p>
+            </div>
+            <div className="ui simple item">
+              <a href="https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy" target="_blank">Average lifespan: {averageLifespan} years old</a>
+            </div>
+            <div className="ui simple item">
+              <a href="https://en.wikipedia.org/wiki/List_of_the_verified_oldest_people" target="_blank">Record to beat: 122 years old</a>
+            </div>
+            <div className="ui simple item">
+              <p>Last updated 25 April 2018</p>
+            </div>
+          </div>
+        </div>
         <div className="life-calendar">
           <div className="calendar-area">
             {calendarYears.map(
               function (yearInfo, index) {
-                return <div className="calendar-year" data-year={yearInfo.year}>
+                return <div className={yearInfo.calendarClassName} title={yearInfo.year} key={index}>
                     <div className="calendar-fill" style={yearInfo.fillStyle}></div>
                   </div>;
               }
