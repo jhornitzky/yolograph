@@ -32,8 +32,12 @@ class App extends Component {
   }
 
   dobChanged = (date) => {
-    var bday = date.unix(); //convert moment to timestamp for persistance
-    var age = this.recalculateAge(date);
+    var bday = null;
+    var age = 0;
+    if (date != null) {
+      bday = date.unix(); //convert moment to timestamp for persistance
+      age = this.recalculateAge(date);
+    }
 
     var newState = {
       birthday: bday,
@@ -59,63 +63,73 @@ class App extends Component {
 
     //calendar data
     var calendarYears = [];
-    if (this.state.birthday !== null) {
-      for (var i = 0; i < maxAge; i++) {
-        var bday = moment.unix(this.state.birthday);
-
-        //set the current year
-        var year = bday.add(i, 'years');
-
-        //calculate year fill day by day
-        var lived = 0;
-        var weeksInYear = 52; //always 52, so easier to deal with
-        var weeksInYearArray = new Array(weeksInYear);
-
-        for (var w = 1; w <= weeksInYear; w++) {
-          var weekInfo = { 
-            weekClassName: "calendar-week" , 
-            title: "Week " + w + " " + year.year(),
-            key: "wy" + w + "" + year.year()
-          };
-
-          if (i === 0) {
-            if ( w >= bday.week()) { 
-              weekInfo.weekClassName += " lived";
-            }
-          } else if (moment().year() > year.year()) {
-            weekInfo.weekClassName += " lived";
-          } else if (moment().year() === year.year() && w < year.week()) {
-            weekInfo.weekClassName += " lived";
-          }
-          weeksInYearArray[w] = weekInfo;
-        }
-
-        // FIXME for year based comparison
-        // if (moment().year() > year.year()) {
-        //   lived = 100;
-        // } else if (moment().year() === year.year()) {
-        //   lived = (year.dayOfYear() / daysInYear) * 100;
-        // } //else it hasnt been lived yet
-
-        //determine if in later years
-        var calClassName = "calendar-year";
-        if (i === averageLifespan) {
-          calClassName += " death";
-        } else if (i > averageLifespan) {
-          calClassName += " past-life";
-        } 
-
-        //create object and return
-        var yearInfo = {
-          key:"y"+year.year(),
-          year: year.year(),
-          calendarClassName: calClassName,
-          weeksInYear: weeksInYear,
-          weeksInYearArray: weeksInYearArray
-        };
-        calendarYears.push(yearInfo);
+    for (var i = 0; i < maxAge; i++) {
+      
+      var startDay;
+      if (this.state.birthday !== null) {
+        startDay = moment.unix(this.state.birthday);
+      } else {
+        startDay = moment();
       }
+
+      //set the current year
+      var year = startDay.add(i, 'years');
+
+      //calculate year fill day by day
+      var weeksInYear = 52; //always 52, so easier to deal with
+      var weeksInYearArray = new Array(weeksInYear);
+
+      for (var w = 1; w <= weeksInYear; w++) {
+        var weekInfo = { 
+          weekClassName: "calendar-week" , 
+          title: "Week " + w + " / " + year.year(),
+          key: "wy" + w + "" + year.year()
+        };
+
+        if (i === 0) {
+          if (w >= startDay.week()) { 
+            weekInfo.weekClassName += " lived";
+          } else {
+            weekInfo.weekClassName += " past-life";
+          }
+        } else if (moment().year() > year.year()) {
+          weekInfo.weekClassName += " lived";
+        } else if (moment().year() === year.year() && w < year.week()) {
+          weekInfo.weekClassName += " lived";
+        }
+        weeksInYearArray[w] = weekInfo;
+      }
+
+      // FIXME for year based comparison
+      // if (moment().year() > year.year()) {
+      //   lived = 100;
+      // } else if (moment().year() === year.year()) {
+      //   lived = (year.dayOfYear() / daysInYear) * 100;
+      // } //else it hasnt been lived yet
+
+      //determine if in later years
+      var calClassName = "calendar-year";
+      if (i === averageLifespan) {
+        calClassName += " death";
+      } else if (i > averageLifespan) {
+        calClassName += " past-life";
+      } 
+
+      //create object and return
+      var yearInfo = {
+        key:"y"+year.year(),
+        year: year.year(),
+        calendarClassName: calClassName,
+        weeksInYear: weeksInYear,
+        weeksInYearArray: weeksInYearArray
+      };
+      calendarYears.push(yearInfo);
     }
+
+    var lifeCalendarClassName = "life-calendar";
+    if (this.state.age === 0) {
+      lifeCalendarClassName += " zero";
+    }     
 
     return (
       <div className="App">
@@ -132,7 +146,7 @@ class App extends Component {
                 showMonthDropdown
                 showYearDropdown
                 dropdownMode="select"
-                placeholderText="Your Birthday"
+                placeholderText="Enter your birth date"
                 className="your-age"
               />
             </div>
@@ -148,18 +162,15 @@ class App extends Component {
             <div className="ui simple item">
               <a href="https://en.wikipedia.org/wiki/List_of_the_verified_oldest_people" rel="noopener noreferrer" target="_blank">Record to beat: 122 years old</a>
             </div>
-            <div className="ui simple item">
-              <p>Based on WHO 2010-2015 data</p>
-            </div>
           </div>
         </div>
-        <div className="life-calendar">
+        <div className={lifeCalendarClassName}>
           <div className="calendar-area">
             {calendarYears.map((yearInfo, yIndex) => {
               return <div className={yearInfo.calendarClassName} key={yIndex}>
                   <div className="calendar-week-holder">
                     {yearInfo.weeksInYearArray.map((weekInfo, wIndex) => {
-                    return <div key={weekInfo.key} className={weekInfo.weekClassName} title={weekInfo.title}></div>
+                    return <div key={weekInfo.key} className={weekInfo.weekClassName} data-tooltip={weekInfo.title}></div>
                     })}
                   </div>
                 </div>;
